@@ -1,5 +1,7 @@
 var app = require('express')();
-var http = require('http').Server(app);
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
 import webpack from 'webpack'
 import webpackMiddleware from 'webpack-dev-middleware'
 import webpackHotMiddleware from 'webpack-hot-middleware'
@@ -28,8 +30,13 @@ res.write(middleware.fileSystem.readFileSync(p))
 res.send()
 })
 
-var port = 3000;
-app.listen(port, 'localhost', function onStart(err) {
+io.on('connection', function(socket){
+  console.log('a user connected');
+  socket.emit('s', {data: 'is data'})
+});
+
+var port = 3001;
+server.listen(port, 'localhost', function onStart(err) {
   if (err) {
     console.log(err);
   }
