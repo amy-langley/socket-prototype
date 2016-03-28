@@ -2,6 +2,8 @@ var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
+var heartbeats = require('heartbeats');
+
 import webpack from 'webpack'
 import webpackMiddleware from 'webpack-dev-middleware'
 import webpackHotMiddleware from 'webpack-hot-middleware'
@@ -30,9 +32,17 @@ res.write(middleware.fileSystem.readFileSync(p))
 res.send()
 })
 
+var tick = function(socket){
+  socket.emit('s', {data: 'tick'})
+}
+
 io.on('connection', function(socket){
-  console.log('a user connected');
-  socket.emit('s', {data: 'is data'})
+  var heart = heartbeats.createHeart(1000);
+  heart.createEvent(1, function(){ tick(socket) })
+  socket.on('disconnect', function(){
+    heart.kill();
+  });
+  tick(socket)
 });
 
 var port = 3001;
